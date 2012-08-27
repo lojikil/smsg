@@ -1,0 +1,82 @@
+-- Help text (this should be the same as the one in the main source file) --
+
+Tiny messenger v%v -- written by Ed de Wonderkat
+Usage: smgs command [arguments]
+These commands can be used:
+  help		displays this help message and quits
+  server	starts a server if none is running yet
+  list		displays a list of users logged on at target host
+		(-d is required)
+  chat		joins you the chatroom (if -d is omitted localhost is used)
+  message	sends a message to specified user on target host,
+		(-d is required)
+  msg,mesg	aliases for message
+  get,getmsg	retrieve the oldest queued message (if there is one)
+  prefs,pref	sets your preferences on the local running server
+
+These arguments can be used:
+  -h,--help	aliases for the 'command' help
+  -z		alternative way to specify a command
+  -n,--nick	sets nickname for chatting (your username by default)
+  --sidebar	configures sidebar in chat, use l or r to place it on
+		the left or right side and use a number to specify width
+  -s,--bar	aliases for --sidebar
+  -e,--erasekey	specifies 'backspace alias' for chat, this might solve
+		some problems (stty like spec or number?)
+  -p,--port	specifies a target port, if used in conjunction with the
+		server command it specifies which port to run the server on
+  --destination	specifies a destination in the form 'host' or 'user@host'
+  -d,--dest	aliases for --destination
+  -t,--tty	specifies a tty (only for prefs command, not for messages!)
+		to remove your preference use 'none' and to set it to your
+		current tty use 'this' or 't'
+  -c,--color	force usage of colors in chatclient
+  -b,--beep	switches beeping on message arrival on/off
+		(only for prefs command, not for messages!)
+  -m,--mode	sets delivery mode, use 'i' for immediate delivery or
+		'q' for queued delivery (use getmsg command to retrieve them)
+  -F,--nofork	prevent server from forking to background
+		(only used in conjunction with server command)
+  -g,-X,--gui	the actions taken will try to use the gui, if that fails
+		console will be used
+  -l,--loglevel	sets the loglevel (default 0), use -1 or below to disable
+		logging (currently only two levels exist)
+  -L,--logfile	sets the file to log to, stderr is used by default
+
+Messages are read from standard input (in case of console usage of course).
+This program takes the messages on/off setting on *nix systems into account.
+
+
+
+-- The source files --
+
+unix/smsg.c	main program which parses commandline arguments and calls appropiate functions
+unix/smsg.h	general things for the program included by (almost) every source file
+unix/clchat.c	client chat function, only to cut the size of client.c
+unix/client.c	client code (reads and sends message or displays info on server running locally)
+unix/servchat.c	function to parse chatting commands, only to reduce size of client.c
+unix/server.c	server code
+unix/serv.h	stuff needed by both server.c and servchat.c
+unix/servmisc.c	functions needed by the server (in separate file to avoid a mess (it's already a mess:))
+//unix/gui.c	gui code for message delivery, message input and info dump (all those things are actually just
+//		one function, an all containing interface)
+//		(console i/o is coded 'inline')
+unix/udata.c	function to keep a list containing per-user information among which is chat information
+ncmd.c		functions to compose and read net commands
+ncmd.h		things needed for other files to be able to use the 'API' defined in cmd.c
+
+-- The explanation --
+
+The whole program communicates over TCP/IP connections with an extra 'layer' on top of it consisting of so called
+'netcommands'. These netcommands are packets of information containing one of the predefined commands together with
+zero or more arguments. How these things are composed as well as which netcommands are available and what arguments
+they take is described in NETCMD.PROTOCOL.
+
+The functionality of the program is split into two parts:
+-sending/receiving messages
+Every system where users must be able to receive messages must run a server so users from that or other systems
+can send messages there. The server then tries to deliver the message to the target user.
+(blah)
+
+-chatting
+(blah)

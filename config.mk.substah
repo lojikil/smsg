@@ -1,0 +1,24 @@
+#WARNING: don't put spaces around the `=', that would break makeme.sh.
+
+#optional compilation flags go here (at the DEFINES= line that is), possible flags:
+#-DWITH_X to compile with X support (does nothing)
+#-DSET_REUSEADDR make the socket address and port reusable (why unset this?)
+#-DNO_ABBREVIATED_COMMANDS_PLEASE don't accept abbreviated netcommands (this used to be a bug)
+DEFINES=-DSET_REUSEADDR @HAVE_NCURSES_DEF@ @HAVE_GETOPT_LONG_DEF@
+
+#some other customizable things
+INSTALL_PREFIX=/usr/local
+lCFLAGS=-Wall -O2
+lLDFLAGS=@SOLARIS_LIBS@
+PORT=16354
+CMDLINE_HISTLEN=25
+MBOXDIR=/var/spool/mail
+
+#some things which might need to be filled in (only if it doesn't work out of the box for you)
+NCURSES_PREFIX=@NCURSES_PATH@
+NETSTAT=@NETSTAT@
+
+#you probably won't have to edit these
+OS="@OSNAME@"
+VERSION=0.64j
+PACKAGE=smsg

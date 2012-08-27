@@ -1,0 +1,54 @@
+THE NETCOMMAND PROTOCOL
+
+1. Intro
+
+-why did I create this?
+-how does it work?
+-this only covers the workings of the 'ncmd-api' and the general netcommands for smsg, chat-netcommands are
+ described in CHATCMD.protocol
+
+
+2. The protocol
+
+Let's call the things travelling between client and server 'net commands'.
+All net commands consist of an identification word, followed by a word indicating the number of arguments,
+followed by zero or more arguments (which, of course, corresponds to the previous field).
+An argument constists of a doubleword indicating the length of the argument (length itself not included), followed
+by the argument data.
+
+-client -> server
+(GETQMSG) [reply: (QMSG) or (NAK)] <user(string)> !Local only!
+ request oldest message on the message queue of the specified user
+(GETLIST) [reply: (LIST) or (NAK)] <no arguments>
+ ask a server for a list of users logged on
+(MSG) [reply: (ACK) or (NAK)] <sending user(string), target user(string), message(string)>
+ sends a message, to specify no target user, use an empty string for it
+(GETPREF) [reply: (PREF) or (NAK)] <user(string)> !Local Only!
+ asks server to tell which tty the specified user prefers ("none" if none) and if a beep is wanted
+(SETPREF) [reply: (ACK) or (NAK)] <user(string), ttyname(string), beep(byte), mode(byte)> !Local Only!
+ tells server which tty a user prefers and if he/she wants a beep on message arrival
+ beep is -1(no preference), 0(off) or 1(on)
+(CHATDOOR) [reply: (ACK) or (NAK)] <joining user(string), alias(string) reason(string)(optional)>
+ ?also superuser/operator flag passing?
+ -'joining user' should be the real username so the server is able to create/lookup correct client structures
+ -to join a chatroom send this with an alias, if NAK is returned it could mean you're banned but also there was a
+  memory allocation failure for example
+ -to leave a chatroom send this with an empty alias, you should always receive an ACK in return, otherwise just quit anyway...
+(CHATMSG) [reply: none] <...>
+ ...(sending of private/public messages)
+
+-server -> client
+(QMSG) [reply to: (GETQMSG)] <number of queued messages left(word) [, time(string), sending user(string), source ip(string)]> !Local only!
+ sends the number of queued messages (left after removing one) and, if at least one message was queued, the oldest
+ message in the queue
+(LIST) [reply to: (GETLIST)] <version(string), os(string), zero or more userinfo structs>
+:userinfo struct: name(string), mesg state(byte)
+ sends server version, os and a list of users logged on
+(PREF) [reply to: (GETPREF)] <ttyname(string), beep(byte), mode(byte)> !Local Only!
+ sends ttyname and beep setting for user requested with the (GETPREF) command ("none"/-1 if no preference)
+(ACK) [reply to: (MSG) (SETPREF) (CHATDOOR)] <no arguments>
+ send when a net command is acknowledged
+(NAK) [reply to: (MSG) (GETQMSG) (SETPREF) (GETLIST) (GETPREF) (CHATDOOR)] <reason(string)>
+ send when a net command is not acknowledged (failure, no permission, etc.)
+(CHATMSG) [reply: none] <...>
+ ...(distribution of public messages/delivery of private messages)

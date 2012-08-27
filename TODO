@@ -1,0 +1,100 @@
+- split chatopts.barspec into barpos (-1=off,0=left,1=right) and barsize(>0,<swidth)
+- fix resize code
+- use config.h instead of -Dblah=yaddi flags
+- xmalloc/xstrlen etc.
+- change ncmd stuff to newchat style (header gen, more lib-like, etc.)
+- /beep feedback ('you beeped everyone|<nick>' 'no one present'(if general beep and no one there))
+- put \n in chat -before- every line so last line of outwin is used too
+- '/who system' command in (net)bsd doesn't work (probably because of the missing /var/run[or log]/utmpx)
+-?add macro's to client
+
+
+general:
+- MAJOR cleanup
+- move store_nl() etc. and chatter_func() prototype to a good place
+- make gnu Makefile structure flat?
+- separate roomsupport from the rest (so 'make roomsup' installs smsgwho and rchat and makes group for roomdir)
+- make good use of log verbosity levels: always:errors 0:none 1:connections 2:messages 3:chat-messages 4or5:debug
+- write good technical description
+- change normal netcommands' names to S_* (!!including their 'textnames'!!) and rename /psay back to /msg
+  (it's all about avoiding conflicts)
+-? restart server on sighup (execv(argv[0], argv);) (also server-restart command in chat?)
+- errorcheck on close() (and try repeatedly on error) (client.c, server.c)
+
+protocol:
+- whois command
+- implement client/server version checking because netcommands could be 'incompatible' (no netcommand changes in minor versions?)
+-? (this seems to work fine (proven by sparc<->intel connection)) net<->host order conversion for numeric args in netcommands
+- print name of serverhost too in userlist (client.c)
+/- use as little who ncmds for the bar as possible to reduce traffic
+-? let udata functions return constant pointers to prevent alteration of the contents (which is not allowed outside udata.c)
+- print only printable characters (or replace unprintables) (like the filter in the chatter)
+- new option (--quiet/-q) to prevent any output (would be difficult :() (smsg.c)
+- chatting clients should be able to receive and send 'normal' messages
+  message delivery: where <code> is existing code:
+       if(user_is_chatting && (ttypref==chattty || !ttypref) { send C_SMSG with message data to servfd } else { <code> }
+  chat client: receive C_SMSG commands and on /smsg command do about the same as the main function would...
+- message queueing:
+ /*add cmdline command 'get' or 'getmsg' to retrieve oldest queued message
+ /*add option to set message delivery mode (immediate (write-like), queued (, queued with char on all terms of user))
+ \*add netcmd (GETQMSG) which returns command (QMSG) containing number of queued messages and, if at least one message
+  was queued, a time(time/date)+username+userhost(ip)+message
+ *add queue functions: queue_get() (dequeue and return oldest msg), queue_add() (add message to queue) and
+  queue_getnum() (return number of queued messages)
+
+server:
+- add /servinfo command to retrieve server uptime, version and ncmd version
+- login/idle time for chatting
+- islocal() must check for 'here' in addition to 'local' (like: upstairs<==>192.168.0.5)...gethostname() (servmisc.c)
+- use a 'gethostinfo()' function instead of inet_ntoa()...sigh...nslookups
+- if no explicit nick given, make it '<nick>_' in case it already exists (like irc/bitchx)
+- check if the tty a user wants to get messages on is really his/her tty (on prefs setting) (server.c)
+- make sure TTYSET_UNDEF and UDATA_TTYDEF can't differ (by assigning one to another or by removing one of them)
+- check for user existance + tty validity in GETPREF (server.c)
+
+|- checking for banned flag should be done on ip/username basis so someone can't just re-enter with another nick
+|- check for users wanting to chat being present sucks.
+|  example: server runs on sure.org, theuser joins chat from sure.org (connects to localhost)...works nice
+|           then someone also called 'theuser' joins from owisthatso.org and is kicked because theuser is already present!
+|  so some host id checking is needed (remote or not is not enough because what if a third remote theuser wants to join?)
+|  ip checks also won't work because most systems have more than one ip (at least localhost+something else)
++----these two things need the same: user matching which now works with username only should work with username+ip
+     solution: change primary key of udata_ent to user+ip..next problem is how to find out if ip's lead to the same sytem or not?
+
+client:
+- trap SIGINT
+- split the sidebar to op/non-op/away/system? (might need scrolling? and other things. blah)
+
+
+
+
+
+
+
+
+
+
+
+
+fix up solaris changes:
+ncurses missing
+->HAVE_NCURSES define
+->cut out all ncurses specific stuff if possible
+
+getopt_long()
+->HAVE_GETOPT_LONG define
+->update cli help
+->added -z option as backup way to specify a command
+
+index()
+->strings.h
+
+redefenition of log()
+->with math.h's log()?
+
+__UT_NAMESIZE
+->some #ifndefs in src/smsg.h
+
+
+-make substah.pl support quoting (==hard)
+->for "-lresolv -lsocket -lnsl"

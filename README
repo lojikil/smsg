@@ -1,0 +1,41 @@
+--README--
+...description comes here...
+
+You need ncurses to be able to compile and use this thing. Not just curses.
+Sorry..
+
+The executables installed are smsg, rchat and smsgwho. Smsg is the main
+executable, read the manual for more information.
+rchat is a script which, with help from smsgwho 'emulates' room support. The
+script works by starting a server on a different port for every room. Problem is
+that it should be set suid/sgid to its own group to have the rooms/servers
+accessible to everyone.
+
+The smsg server suffers from the same problem, if someone happens to find an
+exploit that person should not get root. To get rid of this problem create a
+user and group and set smsg suid/sgid to them. ...blahblahblah...that should be
+automated.
+
+--INSTALL--
+To compile and install this program you need a make program compatible with
+either gnu make or bsd make. In case you do not have such a program try the
+makeme.sh script. The script is not as nice as the makefiles but it should at
+least compile a correct executable.
+
+By default everything is installed under /usr/local, change config.mk if you
+want it somewhere else.
+
+Anyway, do these things to compile and install:
+ 1. run './config.sh' to configure some options etc.
+    This script is quite dumb so it might fail miserably. (Please inform me if
+    it does!)
+ 2. check config.mk and change things if it doesn't suit your needs
+ 3. run 'make'; if you get an error about ncurses, first make sure you -have-
+    ncurses, then find out where it is and put the prefix after
+    'NCURSES_PREFIX=' in config.mk. Example: run 'whereis ncurses' and take the
+    prefix from the ncurses.h file (so /usr/pkg/include/ncurses.h leads
+    to /usr/pkg). Then place that in config.mk and rerun make.
+ 4. run 'make install' to install these files:
+    - $prefix/bin/smsg, $prefix/bin/rchat and $prefix/bin/smsgwho
+    - $prefix/share/man/man1/smsg.1
+    - $prefix/var/rc-smsg (a directory)

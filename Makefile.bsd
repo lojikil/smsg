@@ -1,0 +1,103 @@
+###################
+# TODO: make something good of the install-strip target
+###################
+
+.include "config.mk"
+
+DISTROOT := Makefile.bsd Makefile.gnu config.sh config.mk.substah makeme.sh README TODO substah.sh ncmd.c ncmd.h dustbin/* java/*.java
+DISTDOC := doc/*
+DISTSRC := src/Makefile.gnu src/*.c src/*.h src/smsg.1.substah src/rchat.substah src/rchat.pl
+
+top_srcdir != /bin/pwd
+
+SUBSTAH = ${top_srcdir}/substah.sh
+#SUBSTAH = ./substah.sh
+CFLAGS != echo $$CFLAGS
+CFLAGS += ${lCFLAGS}
+LDFLAGS != echo $$LDFLAGS
+LDFLAGS += ${lLDFLAGS}
+.if !empty(NCURSES_PREFIX)
+ CFLAGS += -I${NCURSES_PREFIX}/include
+ LDFLAGS += -L${NCURSES_PREFIX}/lib
+.endif
+LIBS = -lncurses
+
+prefix := ${INSTALL_PREFIX}
+bindir := ${prefix}/bin
+mandir := ${prefix}/share/man
+localstatedir=${prefix}/var
+
+DEFINES += -DPACKAGE=\"${PACKAGE}\" -DVERSION=\"${VERSION}\" -DOS=\"${OS}\" -DPORT=${PORT} -DCMDLINE_HISTLEN=${CMDLINE_HISTLEN} -DMBOXDIR=\"${MBOXDIR}\"
+
+#deps on smsg.h only
+OBJS1 = src/smsg.o src/udata.o
+#deps on smsg.h and ncmd.h
+OBJS2 = src/clchat.o src/client.o src/servmisc.o
+#deps on smsg.h, ncmd.h and serv.h
+OBJS3 = src/servchat.o src/server.o
+OBJS = $(OBJS1) $(OBJS2) $(OBJS3)
+
+
+all: src/smsg src/smsgwho src/rchat
+
+install: src/smsg src/smsgwho src/rchat
+	install -d $(bindir)
+	install -d $(mandir)/man1
+	install -d $(localstatedir)/rc-smsg
+	install ${strippah} -m 755 -o 0 -g 0 src/smsg $(bindir)/smsg
+	$(SUBSTAH) src/smsg.1.substah "PORT=${PORT}" > src/smsg.1
+	install -m 644 -o 0 -g 0 src/smsg.1 $(mandir)/man1/smsg.1
+	install -m 755 -o 0 -g 0 src/rchat $(bindir)/rchat
+	install ${strippah} -m 755 -o 0 -g 0 src/smsgwho $(bindir)/smsgwho
+	@echo -e "\nYou can create a link called 'chat' to smsg to avoid typing 'smsg chat' every time.\n"
+
+install-strip:
+	make install "strippah=${strippah} -s"
+
+clean:
+	rm -f ncmd.o $(OBJS) core src/core
+
+distclean: clean
+	rm -f Makefile config.mk src/smsg src/smsgwho src/rchat src/smsg.1
+
+#don't ask for this rule directly (like make smsg) because there's no need to and
+#it doesn't depend on __lc because that would screw up the real dep checking...
+src/smsg: ncmd.o $(OBJS)
+	gcc ${CFLAGS} ${LDFLAGS} -I. ${DEFINES} $(LIBS) $(OBJS) ncmd.o -o src/smsg
+
+#don't call this directly (see smsg rule for explanation)
+src/smsgwho: ncmd.o src/smsgwho.c src/smsg.h
+	gcc ${CFLAGS} ${LDFLAGS} -I. ${DEFINES} src/smsgwho.c ncmd.o -o src/smsgwho
+
+#don't call this directly (see smsg rule for explanation)
+src/rchat: src/rchat.substah
+	$(SUBSTAH) src/rchat.substah "SMSG=$(bindir)/smsg" "SMSGWHO=$(bindir)/smsgwho" "ROOMDIR=$(localstatedir)/rc-smsg" "NETSTAT=$(NETSTAT)" > src/rchat
+
+dist:
+	@echo "Creation of a distribution archive is not yet implemented, however you"
+	@echo "can try the dist__ rule but it's not guaranteed it will work correctly."
+
+dist__:
+	mkdir "${PACKAGE}-${VERSION}"
+	cp -r ${DISTROOT} "${PACKAGE}-${VERSION}"
+	cp -r ${DISTDOC} "${PACKAGE}-${VERSION}"
+	cp -r ${DISTSRC} "${PACKAGE}-${VERSION}"
+	tar cvf - "${PACKAGE}-${VERSION}" | bzip2 -9 > "${PACKAGE}-${VERSION}.tar.bz2"
+	rm -r "${PACKAGE}-${VERSION}"
+	@echo ""
+	@echo "WARNING: check if everything you want to be included is in the DIST* variables!"
+
+
+ncmd.o: ncmd.c ncmd.h
+	gcc -c ${CFLAGS} ${DEFINES} ncmd.c -o ncmd.o
+
+#these three rules only exist to let make be aware of the right dependencies
+$(OBJS1) $(OBJS2) $(OBJS3): src/smsg.h
+$(OBJS2) $(OBJS3): ncmd.h
+$(OBJS3): src/serv.h
+
+#general compile rule
+.c.o:
+	gcc ${CFLAGS} -I. ${DEFINES} -c $< -o $@
+
+.PHONY : clean distclean

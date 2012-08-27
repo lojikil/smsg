@@ -1,0 +1,14 @@
+#ifdef __LCC__
+#include <windows.h>
+#endif
+#include "smsgres.h"
+
+IDD_MAINDIALOG DIALOG 250, 200, 200, 45
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "smsg"
+FONT 8, "Helv"
+BEGIN
+    DEFPUSHBUTTON   "jah!", IDOK, 155, 5, 40, 15
+    PUSHBUTTON      "neej!", IDCANCEL, 155, 25, 40, 15
+    CONTROL         "", 101, "SysTabControl32", 0x0 | WS_CLIPSIBLINGS, 23, 6, 70, 70
+END

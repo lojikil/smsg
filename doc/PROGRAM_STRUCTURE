@@ -1,0 +1,41 @@
+Ok I'm not good at drawing schemes, especially when done in ASCII, but here is my first try:
+
+
+The udata_api is a set of functions to store and retrieve data about persons.
+
+The ncmd_api is a set of functions to compose, parse, send and receive netcommands;
+this is actually a layer 'on top of TCP/IP' to make communication easier because one now
+only needs a few functions to say things to or ask things from the other side of the connection.
+
+/---------------SERVER----------------------\
+|                                           |
+| +-----------+            +-------------+  |
+| | udata_api | <--------> | server core |  |
+| +-----------+            +-------------+  |
+|                              ^            |
+|                              |            |
+|                              v            |
+|                         +----------+      |
+|                         | ncmd_api |      |
+|                         +----------+      |
+|                             ^             |
+\-----------------------------|-------------/
+                              |
+/-------CLIENTS---------------|---------------\
+|                             v               |
+|                         +----------+        |
+|                         | ncmd_api |        |
+|                         +----------+        |
+|                             ^               |
+|                             |               |
+|                             v               |
+|                          +-------------+    |
+|                          | client core |    |
+|                          +-------------+    |
+|                                             |
+\---------------------------------------------/
+
+
+
+
+...and here should follow more detailed schemes for every thing shown in the previous one...

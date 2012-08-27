@@ -1,0 +1,137 @@
+.\"Made using the example in the Man-Page mini-HOWTO
+.\"
+.\"TODO:
+.\" - learn how to make man pages :) (and info pages too!)
+.\" - highlight references to options/commands
+.\" - add bug listing? (would be a biiiiiiig list)
+.TH smsg 1 "OCTOBER 2002" Linux "User Manuals"
+.SH NAME
+smsg \- send messages to other users or chat with them
+.SH SYNOPSIS
+\fBsmsg\fR \fIhelp\fR | \fI-h\fR | \fI--help\fR
+.br
+\fBsmsg\fR \fIserver\fR
+[\fI--port \fIPORT\fR\fR] [\fI--nofork\fR] [\fI--loglevel\fR] [\fI--logfile \fIFILE\fR\fR]
+.br
+\fBsmsg\fR \fIlist\fR
+\fI--destination \fIHOST\fR\fR [\fI--port \fIPORT\fR\fR]
+.br
+\fBsmsg\fR \fIchat\fR
+[\fI--nick \fINICKNAME\fR\fR] [\fI--color\fR]  [\fI--port \fIPORT\fR\fR] [\fI--destination \fIHOST\fR\fR]
+.br
+\fBsmsg\fR \fImessage\fR|\fImesg\fR|\fImsg\fR
+\fI--destination \fIUSER\fR@\fIHOST\fR\fR  [\fI--port \fIPORT\fR\fR]
+.br
+\fBsmsg\fR \fIget\fR|\fIgetmsg\fR
+[\fI--port \fIPORT\fR\fR]
+.br
+\fBsmsg\fR \fIprefs\fR|\fIpref\fR
+[\fI--tty \fITTY\fR\fR] [\fI--mode \fIMODE\fR\fR] [\fI--beep\fR]  [\fI--port \fIPORT\fR\fR]
+.SH DESCRIPTION
+\fBsmsg\fR started out as a program to send messages to other users like you
+can do with write. After some time however, the idea to create a chatter arose
+and this program seemed a usable base for it.
+.br
+To use \fBsmsg\fR as a chat program or to enable sending and receiving messages,
+a server needs to be started first (preferrably by root) so clients can connect
+to it. Remember all functions are performed by just one executable.
+.SH OPTIONS
+The arguments \fBsmsg\fR takes are separated into two types: commands and
+options. At all times one and only one command is to be given. Depending one the
+command used, zero or more options are required and others are optional.
+For information about which options apply to which commands, please refer to the
+\fBSYNOPSIS\fR section. If for some reason giving a command does not work, try prefixing it with '-z'.
+.br
+.SS "Description of commands:"
+.IP "\fBhelp\fR"
+.\".br needed to force a new line
+.br
+Display help listing and exit. Exactly the same as the -h and --help options.
+.IP "\fBserver\fR"
+.\".br needed to force a new line
+.br
+Start a server, a server must be running on a host where messages are sent
+and/or received and on a host where users want to chat.
+.IP "\fBlist\fR"
+.\".br needed to force a new line
+.br
+Display a list of users logged on at the targeted host. A host specification is
+required (the -d option).
+.IP "\fBchat\fR"
+.\".br needed to force a new line
+.br
+Join you in the chatroom. To connect to a server on another host use the -d
+option.
+.IP "\fBmsg\fR, \fBmesg\fR, \fBmessage\fR"
+Send a message to specified user on target host. User and host are specified
+using the -d option in the form 'user@host'. Then the message can be entered, it
+is read from stdin thus the message can be piped to \fBsmsg\fR. The message is
+finished by an EOF character, type C-d (CTRL+D) to enter that character.
+.IP "\fBget\fR, \fBgetmsg\fR (Not implemented yet!)"
+Retrieve the oldest queued message (if there is one).
+.IP "\fBpref\fR, \fBprefs\fR"
+Set your preferences on the local running server.
+.br
+.SS "Description of options:"
+.IP "\fB-h\fR, \fB--help\fR"
+Display help listing and exit. Exactly the same as the help command.
+.IP "\fB-n NICKNAME\fR, \fB--nick NICKNAME\fR"
+Used with chat command. Specify a custom \fInickname\fR. Your username will be used
+by default.
+
+.IP "\fB-s BARSPEC\fR, \fB--bar BARSPEC\fR, \fB--sidebar BARSPEC\fR [disabled]"
+Configures the sidebar in chat, use 'l' or 'r' to place it either on the left or
+on the right side and/or use a number to specify the width.
+.IP "\fB-e EKEY\fR, \fB--erasekey EKEY\fR"
+Specifies a custom backspace key for chat, this might solve some problems
+though not all. Some terminals use two-character sequences which ncurses seems
+unable to handle.
+\fIekey\fR can be a decimal, octal or hexadecimal number. Use the /bs command
+inside chat to find out the correct number.
+
+.IP "\fB-p PORT\fR, \fB--port PORT\fR"
+Specifies the target \fIport\fR, if used in conjunction with the server command
+it specifies which port to run the server on. The default port is @PORT@.
+.IP "\fB-d DESTINATION\fR, \fB--dest DESTINATION\fR, \fB--destination DESTINATION\fR"
+Specifies a \fIdestination\fR in the form 'host' or 'user@host'. Which form is
+used depends on the command it is used with.
+.IP "\fB-t TTYSPEC\fR, \fB--tty TTYSPEC\fR"
+Used with prefs command. This specifies the tty you want to receive messages on,
+be sure to specify one owned by you and make sure it is writable by others ( see
+.BR mesg (1)
+). To specify the current tty give 'this' or 't' as \fIttyspec\fR,
+to unset the preference give 'none'.
+.IP "\fB-c\fR, \fB--color\fR"
+Only used with the chat command. It forces usage of colors in the chatclient.
+.IP "\fB-b BEEPMODE\fR, \fB--beep BEEPMODE\fR"
+Used with prefs command. This switches beeping on message arrival on or off. Use
+values like yes, no, on, off etcetera for \fIbeepmode\fR.
+.IP "\fB-m MODE\fR, \fB--mode MODE\fR (Not implemented yet, only immediate delivery is supported!)"
+Used with prefs command. Sets delivery mode, for \fImode\fR use 'i' for
+immediate delivery or 'q' for queued delivery. In case of queued delivery use
+the getmsg command for message retrieval.
+.IP "\fB-F\fR, \fB--nofork\fR"
+Used with server command. Prevent the server from forking to background.
+.IP "\fB-g\fR, \fB-X\fR, \fB--gui\fR (Not implemented and will probably never be. :)"
+The actions taken will try to use the gui, if that fails console will be used.
+.IP "\fB-l LEVEL\fR, \fB--loglevel LEVEL\fR"
+Used with server command. Sets the loglevel, use a negative number as
+\fIlevel\fR to disable logging, 0 to log only errors and 1 to log everything.
+This information may be inccorect by the way.
+.IP "\fB-L FILE\fR, \fB--logfile FILE\fR"
+Used with server command. Sets the logfile to \fIfile\fR, stderr is used by default.
+.\".SH EXAMPLES
+.\".SH FILES
+.\".SH ENVIRONMENT
+.SH BUGS
+Too many. If you find any please report them to the author. Also, if you have
+any suggestions on how to improve the program, please inform the author.
+.SH AUTHORS
+Ed de Wonderkat <elanor@cypher-sec.org>
+.PP
+Matt Logsdon <kassper@atshell.com>
+.PP
+ (send requests/bugs/etc. to support@cypher-sec.org please)
+.SH "SEE ALSO"
+.BR write (1)
+.BR mesg (1)

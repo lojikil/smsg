@@ -1,0 +1,109 @@
+-- The smsg-chat protocol --
+
+This chatting extension to smsg is written with BitchX in mind...the resemblance is not coincidental.
+
+A command starts with a slash ('/') followed by the command name and, in case of present arguments, a space and then a
+space separated list of arguments.
+
+Everything the client sends to the server (using a CHATMSG) consists of a command plus zero or more arguments.
+The only exception to this is everything which does -not- start with a slash...so actually just everything which is not
+a command (but commands with typing errors not included). All those things act like the arguments of the /say command...just
+like in irc...
+
+commands are used locally (l) which means they are not sent over the network, or they are sent from client to server (c),
+or they are sent from server to client (s)
+commands:
+
+
+/door(s)	direction(s) alias(s) reason((s))
+ !!only sent by server...not to be used by clients!!
+  s: notifies clients of [alias] entering (direction!=0) or leaving (direction==0) chat for [reason] (if present)
+#/autoaway(l)	time(l)
+# should autoaway be local? if the server keeps track I wouldn't need to code timer stuff into the client
+#  l: set autoaway time to [time] minutes (client should send an away command after [time] minutes if not already away)
+/away(cs)	state(s) alias(s) reason((c)(s))
+  c: switches away status (status = (on ? off : on)) with optional [reason]
+  s: notifies clients of [alias] switching away state ([state]: !0=away, 0=not away) with optional [reason]
+!!/ban(cs)	alias(c(s)) banner((s)) reason((c)(s))
+  c: ban [alias] (sender must be op!) for [reason]
+  s: a) (to everyone, #arg=2||3) notifies clients [alias] is being banned for [reason]
+     b) (to sender, #arg=1) tells sender [alias] doesn't exist
+     c) (to sender, #arg=0) tells sender he/she isn't op and therefore can't ban anyone
+/beep(cs)	alias((c)(s))
+  c: beep [alias]' terminal, or, if [alias] is omitted beep everyones terminal
+  s: a) (to everyone, #arg=0) send beep command to [alias], or, if [alias] is omitted to everyone
+     b) (to sender, #arg=1) tells sender [alias] is not present
+/bs(l)		backspace_key
+  l: set backspace to [backspace_key] (^h and ^? are still valid), alphanumeric characters and / are invalid
+/clear(l)
+  l: clear the chatscreen if possible
+/deop(cs)	alias(c(s)) deopper((s))
+  c: takes away operator rights from [alias] (sender must be op!)
+  s: a) (to everyone, #arg=2) notifies clients [alias] is being de-opped by [deopper]
+     b) (to sender, #arg=1) tells sender [alias] doesn't exist
+     c) (to sender, #arg=0) tells sender he/she isn't op and therefore can't deop anyone else
+/help(l)	topic((l))
+  l: list help on [topic] or, if [topic] is omitted, some general help plus a topic list
+/kick(cs)	alias(cs) kicker((s)) reason((c)(s))
+  c: kick [alias] (sender must be op!) for [reason]
+  s: a) (to everyone, #arg=2||3) you're being kicked by [alias] for [reason]
+     b) (to sender, #arg=1) tells sender [alias] doesn't exist
+     c) (to sender, #arg=0) tells sender he/she isn't op and therefore can't kick anyone
+/log(l)		file((l))
+  l: start or stop session log (depending on current state), if [file] is given when starting log, that
+     file is used instead of the default
+/me(cs)		alias(s) message(cs)
+  c: remark [message] to everyone
+  s: remark [message] received from [alias] is sent to everyone
+/nick(cs)	newnickname((c)(s)) oldnickname((s))
+  c: returns your nickname if used without argument, sets your nickname to [newnickname] otherwise
+  s: a) (to everyone, #arg=2) notifies clients of [oldnickname] changing name to [newnickname]
+     b) (to sender, #arg=1) tells you your [nickname]
+     c) (to sender, #arg=0) the new nickname you desired is already in use
+/op(cs)		alias(c(s)) opper((s))
+  c: gives [alias] operator rights (sender must be op!)
+  s: a) (to everyone, #arg=2) notifies clients [alias] is being opped by [opper]
+     b) (to sender, #arg=1) tells sender [alias] doesn't exist
+     c) (to sender, #arg=0) tells sender he/she isn't op and therefore can't op anyone else
+/oper(cs)	password(c) alias((s))
+  c: give youself operator rights by specifying the correct [password]
+     (should this be a global password or a user password? (which would be checked the same way as login does...))
+  s: a) (to everyone, #arg=1) notifies clients [alias] opped him/herself
+     b) (to sender, #arg=0) tells client an incorrect password was supplied
+!!/priv(l)	alias(l)
+  l: engages private conversation with [alias] by sending your messages asmsg commands instead of say commands,
+     can be overridden by explicitly using the say command, using priv command again ends converstaion
+/psay(cs)	alias(cs) alias2((s)) message(c(s))
+  c: send [message] to [alias]
+  s: a) (to recipient, #arg=2) message [message] received from [alias] is sent to you privately
+     b) (to sender, #arg=3) message [message] has been sent to [alias2] from [alias] (which is you)
+     c) (to sender, #arg=1) [alias] is not present in chat, therefore the message could not be sent
+/quit(l)
+  l: quit client (server will be notified by a CHATDOOR netcommand)
+/say(cs)	alias(s) message(cs)
+  c: send [message] to everyone
+  s: message [message] received from [alias] is sent to everyone
+#/su(cs)		password(c) alias((s))
+#  c: give yourself superuser rights (the one who is invulnerable and can do anything with anyone)
+#     provided you supplied the correct [password]
+#  s: a) (to sender) you supplied a wrong password
+#     b) (to everyone) notifies everyone about [user] becoming the superuser
+#/unsu(cs)	alias((s))
+#  c: stop being the superuser (now why would anyone do that? :)
+#  s: a) (to sender, #arg=0) informs you you weren't the superuser so there's no point in sending /unsu
+#     b) (to everyone, #arg=1) informs everyone [alias] is not the superuser anymore
+!!/unban(cs)	alias(c(s)) unbanner((s))
+  c: unban (so the user can enter again) [alias] (sender must be op!)
+  s: a) (to everyone, #arg=2) notifies clients [alias] is unbanned
+     b) (to sender, #arg=1) tells sender [alias] doesn't exist
+     c) (to sender, #arg=0) tells sender he/she isn't op and therefore can't unban anyone
+/who(cs)	[whatinfo](cs) [alias info]*(s)
+  c: request list of aliases plus realnames and hosts/ip's of all connected clients
+     if received with one arg, namely '&!KRySTaLBaLL!&' a list is returned no matter if the sender is present
+     if recieved with one arg being 1 byte namely 0, 1 or 2 that indicated the type of info to be returned
+     (0=who's in chat (same as if the arg hadn't been given); 1=who's logged in; 2=both)
+     if first arg is the magic one, any further args will be discarded
+  s: list of connected clients, for every client a pair of [alias] and [info](username+host/ip) arguments
+     if command was received with [whatinfo], the first arg contains this again so the client knows what it gets
+
+...suggestions for more commands: finger, ping, whois, serverinfo
