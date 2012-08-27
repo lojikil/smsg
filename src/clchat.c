@@ -101,7 +101,6 @@ static int update_outwin = 0, update_statwin = 0, update_inwin = 0, update_chaty
 static int use_color = 0;
 static int backspace_char = KEY_BACKSPACE;
 static char **culist = NULL;	//pointer array for keeping usernames
-static FILE *logfile = NULL;
 static int mailcount = -1;	//-1 is unknown number of mails
 static struct timeval mailival, maillastcheck, temptv;
 
@@ -233,7 +232,6 @@ static void lcc_asay(int prefix, char *format, ...)
 
 	while(1) {
 		if(prefix < LCC_ASAY_NUM_PREFIXES && prefix > 0) {
-			lcc_attrset(cwin_out, lcc_asay_prefixes[prefix].attrib);
 			waddstr(cwin_out, lcc_asay_prefixes[prefix].prefix);
 			if(logfile) fputs(lcc_asay_prefixes[prefix].prefix, logfile);
 #ifdef HAVE_NCURSES
@@ -576,33 +574,30 @@ int i;
 	}
 
 //******* main code
-	lcc_attrset(cwin_out, 10);
 	lcc_asay(1, " ,s$SSSSSSS$s.  .sS. sSSs.`SSSSS&s, .sSSSSSS'\n");
 	lcc_asay(1, " 7SS'     _oSP .SS SYY `SS `SS.     SS'   \"'");
-	lcc_attrset(cwin_out, 2); lcc_asay(0, "   C H A T T E R\n"); lcc_attrset(cwin_out, 10);
+	lcc_asay(0, "   C H A T T E R\n");
 	lcc_asay(1, "  `%%S$s. SS^\" .S'  `Y' dS'. ^7SSs. dS .oSs.");
-	lcc_attrset(cwin_out, 4); lcc_asay(0, "      v"VERSION"\n"); lcc_attrset(cwin_out, 10);
+	lcc_asay(0, "      v"VERSION"\n");
 	lcc_asay(1, " So  `3S    .sY` .   .dS'     `%%S' SS.  `SS.\n");
 	lcc_asay(1, " `SSSS&' .,$P+'   .s&SP'.sSSSSS$'  `sSSSSSSP");
-	lcc_attrset(cwin_out, 9); lcc_asay(0, "  by Ed de Wonderkat and Matt Logsdon\n");
+	lcc_asay(0, "  by Ed de Wonderkat and Matt Logsdon\n");
 	lcc_asay(0, "\n");
 
-lcc_attrset(cwin_out, 12);
-lcc_asay(3, "***** Please send any complaints, bug reports or comments to:\n");
-lcc_asay(3, "***** elanor@cypher-sec.org\n");
-lcc_asay(3, "\n");
-lcc_asay(3, "Notes:\n");
-lcc_asay(3, "If your backspace key does not work correctly use the /bs command to set a\n");
-lcc_asay(3, "custom backspace key. A commandline argument for that is being worked on, be\n");
-lcc_asay(3, "patient.\n");
-lcc_asay(3, "This remedy (read: ugly hack) will only work in some particular cases; it\n");
-lcc_asay(3, "appears some terminals use a two-char sequence which ncurses can't handle afaik.\n");
-lcc_asay(3, "If you know how to solve this please tell me!\n");
-lcc_asay(3, "\n");
-lcc_asay(3, "Yay! Smsg now has tab completion!\n");
-lcc_asay(3, "And there is now command history, use cursor up and down.\n");
-lcc_asay(0, "\n");
-	lcc_attrset(cwin_out, LCC_ODEFAULT_C);
+    lcc_asay(3, "***** Please send any complaints, bug reports or comments to:\n");
+    lcc_asay(3, "***** elanor@cypher-sec.org\n");
+    lcc_asay(3, "\n");
+    lcc_asay(3, "Notes:\n");
+    lcc_asay(3, "If your backspace key does not work correctly use the /bs command to set a\n");
+    lcc_asay(3, "custom backspace key. A commandline argument for that is being worked on, be\n");
+    lcc_asay(3, "patient.\n");
+    lcc_asay(3, "This remedy (read: ugly hack) will only work in some particular cases; it\n");
+    lcc_asay(3, "appears some terminals use a two-char sequence which ncurses can't handle afaik.\n");
+    lcc_asay(3, "If you know how to solve this please tell me!\n");
+    lcc_asay(3, "\n");
+    lcc_asay(3, "Yay! Smsg now has tab completion!\n");
+    lcc_asay(3, "And there is now command history, use cursor up and down.\n");
+    lcc_asay(0, "\n");
 	update_outwin = 1;
 
 	backspace_char = chatopts->erase_key;
@@ -1161,10 +1156,9 @@ int i;
 					ncmd_getarg(rbuf, rbuf_len, &targ0, &targ0_len, 0, 1);
 					ncmd_getarg(rbuf, rbuf_len, &targ1, &targ1_len, 1, 1);
 
-					lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, LCC_OEMOTE_S);
-					lcc_attrset(cwin_out, LCC_OEMOTE_C); lcc_asay(0, "%s %s", targ0, targ1);
-					lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, LCC_OEMOTE_E"\n");
-					lcc_attrset(cwin_out, LCC_ODEFAULT_C);
+					lcc_asay(0, LCC_OEMOTE_S);
+					lcc_asay(0, "%s %s", targ0, targ1);
+					lcc_asay(0, LCC_OEMOTE_E"\n");
 					break;
 				case C_OPER:
 					if(ncmd_getnumargs(rbuf, rbuf_len) > 0) {
@@ -1188,19 +1182,19 @@ int i;
 					case 2:
 						ncmd_getarg(rbuf, rbuf_len, &targ0, &targ0_len, 0, 1);
 						ncmd_getarg(rbuf, rbuf_len, &targ1, &targ1_len, 1, 1);
-						lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, LCC_OMSG_S);
-						lcc_attrset(cwin_out, LCC_OMSG_C); lcc_asay(0, "(p)%s", targ0);
-						lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, LCC_OMSG_E);
-						lcc_attrset(cwin_out, LCC_ODEFAULT_C); lcc_asay(0, " %s\n", targ1);
+						lcc_asay(0, LCC_OMSG_S);
+						lcc_asay(0, "(p)%s", targ0);
+						lcc_asay(0, LCC_OMSG_E);
+						lcc_asay(0, " %s\n", targ1);
 						break;
 					case 3:
 						ncmd_getarg(rbuf, rbuf_len, &targ0, &targ0_len, 0, 1);
 						ncmd_getarg(rbuf, rbuf_len, &targ1, &targ1_len, 1, 1);
-						lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, LCC_OMSG_S);
-						lcc_attrset(cwin_out, LCC_OMSG_C); lcc_asay(0, "(p)%s->%s", targ0, targ1);
-						lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, LCC_OMSG_E);
+						lcc_asay(0, LCC_OMSG_S);
+						lcc_asay(0, "(p)%s->%s", targ0, targ1);
+						lcc_asay(0, LCC_OMSG_E);
 						ncmd_getarg(rbuf, rbuf_len, &targ0, &targ0_len, 2, 1);
-						lcc_attrset(cwin_out, LCC_ODEFAULT_C); lcc_asay(0, " %s\n", targ0);
+						lcc_asay(0, " %s\n", targ0);
 						break;
 					default:
 						lcc_asay(2, "server sent a psay command with wrong number of args\n");
@@ -1238,13 +1232,10 @@ int i;
 					ncmd_getarg(rbuf, rbuf_len, &targ0, &targ0_len, 0, 1);
 					ncmd_getarg(rbuf, rbuf_len, &targ1, &targ1_len, 1, 1);
 
-					lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, LCC_OSAY_S);
-					if(strcmp(targ0+ign_chars, nick) == 0) lcc_attrset(cwin_out, LCC_OSAYSELF_C);
-					else if(strstr(targ1, nick)) lcc_attrset(cwin_out, LCC_OSAYPERS_C);
-					else lcc_attrset(cwin_out, LCC_OSAY_C);
+					lcc_asay(0, LCC_OSAY_S);
 					lcc_asay(0, "%s", targ0);
-					lcc_attrset(cwin_out, LCC_OSE_C); lcc_asay(0, "]");
-					lcc_attrset(cwin_out, LCC_ODEFAULT_C); lcc_asay(0, " %s\n", targ1);
+					lcc_asay(0, "]");
+					lcc_asay(0, " %s\n", targ1);
 					break;
 				}
 				case C_BAN:
