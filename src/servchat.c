@@ -275,7 +275,7 @@ static int beleet = 0;
 			ncmd_set(&sbuf, &sbuf_len, C_PSAY);
 			ncmd_add(&sbuf, &sbuf_len, tud_sender->nick, xstrlen(tud_sender->nick));
 			ncmd_add(&sbuf, &sbuf_len, targ1, targ1_len);
-			temps = strdup(lcs_userinfo(-1, tud->fd, NULL)); slog(0, "chat: %s says to %s: '%s'", lcs_userinfo(cl_idx, -1, NULL), temps, targ1); free(temps);
+			//temps = strdup(lcs_userinfo(-1, tud->fd, NULL)); slog(0, "chat: %s says to %s: '%s'", lcs_userinfo(cl_idx, -1, NULL), temps, targ1); free(temps);
 			lcs_send_ncmd(sbuf, sbuf_len, -1, tud->fd);
 
 			ncmd_set(&sbuf, &sbuf_len, C_PSAY);
@@ -284,7 +284,7 @@ static int beleet = 0;
 			ncmd_add(&sbuf, &sbuf_len, targ1, targ1_len);
 			lcs_send_ncmd(sbuf, sbuf_len, cl_idx, -1);
 		} else {	//assume tud_sender!=NULL, so tud must be NULL...
-			slog(0, "chat: %s tried to say to %s who doesn't exist!!!: '%s'", lcs_userinfo(cl_idx, -1, NULL), targ0, targ1);
+			//slog(0, "chat: %s tried to say to %s who doesn't exist!!!: '%s'", lcs_userinfo(cl_idx, -1, NULL), targ0, targ1);
 			ncmd_set(&sbuf, &sbuf_len, C_PSAY);
 			ncmd_add(&sbuf, &sbuf_len, targ0, targ0_len);
 			lcs_send_ncmd(sbuf, sbuf_len, cl_idx, -1);
@@ -301,8 +301,10 @@ static int beleet = 0;
 		ts = lcs_compose_name(cl_idx);
 		if(beleet) lcs_msg_translate(targ0, targ0_len, 1);
 
+        /*
 		if(tncmd == C_SAY) slog(0, "chat: %s says: '%s'", lcs_userinfo(cl_idx, -1, NULL), targ0);
 		else slog(0, "chat: %s: '%s %s'", lcs_userinfo(cl_idx, -1, NULL), tud->nick, targ0);
+        */
 		ncmd_set(&sbuf, &sbuf_len, tncmd);
 		ncmd_add(&sbuf, &sbuf_len, ts, xstrlen(ts));
 		ncmd_add(&sbuf, &sbuf_len, targ0, targ0_len);
